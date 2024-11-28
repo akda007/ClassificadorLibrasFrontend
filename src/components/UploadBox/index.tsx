@@ -1,7 +1,9 @@
 import React, { useCallback, useState } from "react";
-import { Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
+
+import "./index.module.css"
 
 type UploadBoxProps = {
     finished: boolean
@@ -19,36 +21,27 @@ export default function UploadBox({finished, setFinished, onLoad}: UploadBoxProp
         setLoading(true)
 
         const formData = new FormData();
-        acceptedFiles.forEach((file) => formData.append("files", file));
-
-        setFinished(true)
-        setLoading(false)
-        onLoad("teste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteseste testeteste testeteste testeteste testeteste testeteste testeteste testeteste teste")
-        const reader = new FileReader()
-        reader.readAsDataURL(acceptedFiles[0])
-        reader.onloadend = () => {
-            setFile(reader.result as 'string')
-            console.log(reader.result)
-        }
-        return
+        formData.append("model_type", "image-classifier")
+        acceptedFiles.forEach((file) => formData.append("media", file));
         
         try {
-            const response = await axios.post("https://your-api-url/upload", formData, {
+            const response = await axios.post("http://127.0.0.1:5000/classify", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
+
             console.log("Upload successful:", response.data);
-            alert("File uploaded successfully!");
 
             setFinished(true)
             setLoading(false)
+            onLoad(response.data.classification)
             const reader = new FileReader()
-            reader.readAsDataURL(acceptedFiles[0])
-            reader.onloadend = () => {
-            setFile(reader.result as 'string')
-            console.log(reader.result)
-        }
+                reader.readAsDataURL(acceptedFiles[0])
+                reader.onloadend = () => {
+                setFile(reader.result as 'string')
+                console.log(reader.result)
+            }
         } catch (error) {
             console.error("Upload failed:", error);
             alert("Failed to upload the file. Please try again.");
@@ -59,8 +52,13 @@ export default function UploadBox({finished, setFinished, onLoad}: UploadBoxProp
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
         multiple: false,
-        accept: { "video/*": [], "image/*": [] },
+        accept: { "image/*": [] },
     });
+
+    const reset = () => {
+        setFinished(false)
+        onLoad("")
+    }
 
     return (
         <>
@@ -79,8 +77,18 @@ export default function UploadBox({finished, setFinished, onLoad}: UploadBoxProp
                     border: "2px dashed",
                     borderColor: "white",
                     cursor: "pointer",
+                    position: "relative"
                 }}>
-                    <video src={file} controls style={{width: "100%", height: "100%", borderRadius: "15px"}}/>
+                    <Box onClick={reset}
+                        sx={{
+                            position: "absolute",
+                            top: "-4%",
+                            right: "-4%"
+                        }}
+                    >
+                        <span className="material-symbols-outlined" style={{fontSize: "40px", color: "#f16a6a"}}>cancel</span>
+                    </Box>
+                    <img src={file} style={{width: "100%", height: "100%", borderRadius: "15px"}}/>
                 </Box>
             }
 
@@ -130,12 +138,12 @@ export default function UploadBox({finished, setFinished, onLoad}: UploadBoxProp
                     </span>
                     <Typography
                         variant="h6"
-                        sx={{ maxWidth: "50%" }}
+                        sx={{ maxWidth: "65%" }}
                         textAlign={"center"}
                     >
                         {isDragActive
                             ? "Solte o arquivo para fazer upload"
-                            : "Arraste ou clique para fazer upload de um vídeo"}
+                            : "Arraste ou clique para fazer upload de uma imagem"}
                     </Typography>
                 </Box>
             }

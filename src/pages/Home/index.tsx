@@ -1,7 +1,9 @@
-import { Box, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import Navbar from "../../components/Navbar";
 import UploadBox from "../../components/UploadBox";
 import { useState } from "react";
+
+import "./"
 
 export default function Home() {
     const [finished, setFinished] = useState(false)
@@ -42,8 +44,7 @@ export default function Home() {
                         padding={3}
 
                     >
-                        <Typography variant="h3">Transcrição</Typography>
-                        <Typography>{text}</Typography>
+                        <Typography variant="h3" textAlign={"center"}>Letra: {text}</Typography>
                     </Stack>
                 }
 
